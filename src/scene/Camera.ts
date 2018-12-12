@@ -36,7 +36,6 @@ export default class Camera {
 
   public move(): void {
     if (Keyboard.isUp()) {
-      console.log(this.position);
       vec3.add(this.position, this.position, vec3.fromValues(0, 0, -Camera.CAMERA_VELOCITY));
     }
     if (Keyboard.isDown()) {

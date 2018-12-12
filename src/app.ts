@@ -18,15 +18,88 @@ let renderer: Renderer;
 let texture: Texture;
 let shader: Shader;
 
-const texturePositions = [
-  -50.0, -50.0, 0.0, 0.0,
-   50.0, -50.0, 1.0, 0.0,
-   50.0,  50.0, 1.0, 1.0,
-  -50.0,  50.0, 0.0, 1.0
+const positions = [
+  -0.5,0.5,-0.5,	0, 0,
+  -0.5,-0.5,-0.5,	0, 1,
+  0.5,-0.5,-0.5,	1, 1,
+  0.5,0.5,-0.5,		1, 0,
+  
+  -0.5,0.5,0.5,	0, 0,
+  -0.5,-0.5,0.5,  0, 1,	
+  0.5,-0.5,0.5,	  1, 1,
+  0.5,0.5,0.5,  1, 0,
+  
+  0.5,0.5,-0.5,	0, 0,
+  0.5,-0.5,-0.5,  0, 1,	
+  0.5,-0.5,0.5,	  1, 1,
+  0.5,0.5,0.5,  1, 0,
+  
+  -0.5,0.5,-0.5,	0, 0,
+  -0.5,-0.5,-0.5,	  0, 1,
+  -0.5,-0.5,0.5,	  1, 1,
+  -0.5,0.5,0.5,  1, 0,
+  
+  -0.5,0.5,0.5,  0, 0,
+  -0.5,0.5,-0.5,   0, 1,
+  0.5,0.5,-0.5,  1, 1,
+  0.5,0.5,0.5,  1, 0,
+  
+  -0.5,-0.5,0.5,  0, 0,
+  -0.5,-0.5,-0.5,  0, 1,
+  0.5,-0.5,-0.5,  1, 1,
+  0.5,-0.5,0.5,   1, 0 
 ];
+
+const textureCoords = [
+  0, 0,
+  0, 1,
+  1, 1,
+  1, 0,
+
+  0, 0,
+  0, 1,
+  1, 1,
+  1, 0,			
+
+  0, 0,
+  0, 1,
+  1, 1,
+  1, 0,
+
+  0, 0,
+  0, 1,
+  1, 1,
+  1, 0,
+
+  0, 0,
+  0, 1,
+  1, 1,
+  1, 0,
+  
+  0, 0,
+  0, 1,
+  1, 1,
+  1, 0 
+];
+
 const indices = [
-  0, 1, 2,
-  2, 3, 0
+  0,1,3,	
+  3,1,2,
+
+  4,5,7,
+  7,5,6,
+
+  8,9,11,
+  11,9,10,
+
+  12,13,15,
+  15,13,14,	
+
+  16,17,19,
+  19,17,18,
+
+  20,21,23,
+  23,21,22
 ];
 
 window.addEventListener('load', load);
@@ -73,14 +146,14 @@ function start(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   
   const va = new VertexArray(renderer);
-  const vb = new VertexBuffer(renderer, texturePositions);
+  const vb = new VertexBuffer(renderer, positions);
 
-  const layout = new VertexBufferLayout(renderer, );
-  layout.pushFloat(2);
+  const layout = new VertexBufferLayout(renderer);
+  layout.pushFloat(3);
   layout.pushFloat(2);
   va.addBuffer(vb, layout);
 
-  const ib = new IndexBuffer(renderer, indices, 6);
+  const ib = new IndexBuffer(renderer, indices, indices.length);
 
   const projectionMatrix = mat4.perspective(
     mat4.create(),
@@ -118,11 +191,11 @@ function start(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
 
     {
       shader.setUniformMat4f('viewMatrix', camera.createViewMatrix());
-      shader.setUniformMat4f('transformationMatrix', createTransformationMatrix(vec3.fromValues(-1, 0, -1), 0, 0, 0, 0.005));
+      shader.setUniformMat4f('transformationMatrix', createTransformationMatrix(vec3.fromValues(0, 0, -1), increment, increment, 0, 1));
       renderer.draw(va, ib, shader);
     }
 
-    increment += 0.002;
+    increment += 0.05;
 
     requestAnimationFrame(draw);
   }
