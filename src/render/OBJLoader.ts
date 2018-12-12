@@ -30,13 +30,16 @@ import IndexBuffer from './IndexBuffer';
 import RawModel from './RawModel';
 
 export default class OBJLoader {
+
+  // TODO: optimize loadObjModel
+
   /**
    * 
    * @param {string} filepath - Filepath to .obj file.
    * @param {VertexArray} va - Vertex array to bind model data.
    * @returns {Promise} - Promise resolved when data is loaded.
    */
-  static loadObjModel(renderer: Renderer, filepath: string, model: RawModel): Promise<any> {
+  static async loadObjModel(renderer: Renderer, filepath: string, model: RawModel): Promise<any> {
     const vertices: vec3[] = [];
     const textures: vec2[] = [];
     const normals: vec3[] = [];
@@ -45,91 +48,74 @@ export default class OBJLoader {
     const texturesArray = [];
     const normalsArray = [];
 
-    return fetch(filepath).then(res => res.text().then(txt => {
-      const allLines = txt.split(/\r\n|\n/);
-      allLines.forEach((line) => {
-        const currentLine = line.split(' ');
-
-        if (line.startsWith('v ')) {
-          vertices.push(vec3.fromValues(
-            Number(currentLine[1]),
-            Number(currentLine[2]),
-            Number(currentLine[3])
+    const res = await fetch(filepath);
+    const txt = await res.text();
+    const allLines = txt.split(/\r\n|\n/);
+    
+    allLines.forEach((line) => {
+      const currentLine = line.split(' ');
+      if (line.startsWith('v ')) {
+        vertices.push(vec3.fromValues(
+          Number(currentLine[1]),
+          Number(currentLine[2]),
+          Number(currentLine[3])
           ));
-        } else if (line.startsWith('vt ')) {
-          textures.push(vec2.fromValues(
-            Number(currentLine[1]),
-            Number(currentLine[2])
+      } else if (line.startsWith('vt ')) {
+        textures.push(vec2.fromValues(
+          Number(currentLine[1]),
+          Number(currentLine[2])
           ));
-        } else if (line.startsWith('vn ')) {
-          normals.push(vec3.fromValues(
-            Number(currentLine[1]),
-            Number(currentLine[2]),
-            Number(currentLine[3])
+      } else if (line.startsWith('vn ')) {
+        normals.push(vec3.fromValues(
+          Number(currentLine[1]),
+          Number(currentLine[2]),
+          Number(currentLine[3])
           ));
-        } else if (line.startsWith('f ')) {
-          const vertex1 = currentLine[1].split('/');
-          const vertex2 = currentLine[2].split('/');
-          const vertex3 = currentLine[3].split('/');
-
-          processVertex(vertex1, indicesArray, textures, normals, texturesArray, normalsArray)
-          processVertex(vertex2, indicesArray, textures, normals, texturesArray, normalsArray)
-          processVertex(vertex3, indicesArray, textures, normals, texturesArray, normalsArray)
-        }
-      });
-
-      const verticesArray = [];
-      let vertexPointer = 0;
-      vertices.forEach(vector => {
-        verticesArray[vertexPointer++] = vector[0];
-        verticesArray[vertexPointer++] = vector[1];
-        verticesArray[vertexPointer++] = vector[2];
-      });
-
-      
-      const data: number[] = [];
-
-      let pointer1 = 0;
-      let pointer2 = 0;
-      let pointer3 = 0;
-      const dataSize = Math.floor(verticesArray.length / 3);
-      for (let i = 0; i < dataSize; i++) {
-        data.push(
-          verticesArray[pointer1++],
-          verticesArray[pointer1++],
-          verticesArray[pointer1++],
-
-          texturesArray[pointer2++],
-          texturesArray[pointer2++],
-          
-          normalsArray[pointer3++],
-          normalsArray[pointer3++],
-          normalsArray[pointer3++],
-        );
+      } else if (line.startsWith('f ')) {
+        const vertex1 = currentLine[1].split('/');
+        const vertex2 = currentLine[2].split('/');
+        const vertex3 = currentLine[3].split('/');
+        processVertex(vertex1, indicesArray, textures, normals, texturesArray, normalsArray);
+        processVertex(vertex2, indicesArray, textures, normals, texturesArray, normalsArray);
+        processVertex(vertex3, indicesArray, textures, normals, texturesArray, normalsArray);
       }
-      
-      for (let i = 0; i < data.length / (3 + 2 + 3); i++) {
-        let s = "";
+    });
 
-        for (let j = 0; j < 6; j++) {
-          s += data[i + j] + " ";
-        }
+    const verticesArray = [];
+    let vertexPointer = 0;
+    vertices.forEach(vector => {
+      verticesArray[vertexPointer++] = vector[0];
+      verticesArray[vertexPointer++] = vector[1];
+      verticesArray[vertexPointer++] = vector[2];
+    });
 
-        console.log(s);
-      }
+    const data: number[] = [];
+    let pointer1 = 0;
+    let pointer2 = 0;
+    let pointer3 = 0;
+    const dataSize = Math.floor(verticesArray.length / 3);
+    for (let i = 0; i < dataSize; i++) {
+      data.push(
+        verticesArray[pointer1++],
+        verticesArray[pointer1++],
+        verticesArray[pointer1++],
+        texturesArray[pointer2++],
+        1 - texturesArray[pointer2++],
+        normalsArray[pointer3++],
+        normalsArray[pointer3++],
+        normalsArray[pointer3++]);
+    }
 
-      const va = new VertexArray(renderer);
-      
-      const vb = new VertexBuffer(renderer, data);
-      const layout = new VertexBufferLayout(renderer);
-      layout.pushFloat(3);
-      layout.pushFloat(2);
-      layout.pushFloat(3);
-      va.addBuffer(vb, layout);
+    const va = new VertexArray(renderer);
+    const vb = new VertexBuffer(renderer, data);
+    const layout = new VertexBufferLayout(renderer);
+    layout.pushFloat(3);
+    layout.pushFloat(2);
+    layout.pushFloat(3);
+    va.addBuffer(vb, layout);
 
-      const ib = new IndexBuffer(renderer, indicesArray, indicesArray.length);
-      model.load(va, ib);
-    }));
+    const ib = new IndexBuffer(renderer, indicesArray, indicesArray.length);
+    model.load(va, ib);
   }
 }
 

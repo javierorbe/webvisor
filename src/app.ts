@@ -22,60 +22,6 @@ let shader: Shader;
 let texture: Texture;
 let model: RawModel = new RawModel();
 
-/*
-const positions = [
-  -0.5,0.5,-0.5,	0, 0,
-  -0.5,-0.5,-0.5,	0, 1,
-  0.5,-0.5,-0.5,	1, 1,
-  0.5,0.5,-0.5,		1, 0,
-  
-  -0.5,0.5,0.5,	0, 0,
-  -0.5,-0.5,0.5,  0, 1,	
-  0.5,-0.5,0.5,	  1, 1,
-  0.5,0.5,0.5,  1, 0,
-  
-  0.5,0.5,-0.5,	0, 0,
-  0.5,-0.5,-0.5,  0, 1,	
-  0.5,-0.5,0.5,	  1, 1,
-  0.5,0.5,0.5,  1, 0,
-  
-  -0.5,0.5,-0.5,	0, 0,
-  -0.5,-0.5,-0.5,	  0, 1,
-  -0.5,-0.5,0.5,	  1, 1,
-  -0.5,0.5,0.5,  1, 0,
-  
-  -0.5,0.5,0.5,  0, 0,
-  -0.5,0.5,-0.5,   0, 1,
-  0.5,0.5,-0.5,  1, 1,
-  0.5,0.5,0.5,  1, 0,
-  
-  -0.5,-0.5,0.5,  0, 0,
-  -0.5,-0.5,-0.5,  0, 1,
-  0.5,-0.5,-0.5,  1, 1,
-  0.5,-0.5,0.5,   1, 0 
-];
-
-const indices = [
-  0,1,3,	
-  3,1,2,
-
-  4,5,7,
-  7,5,6,
-
-  8,9,11,
-  11,9,10,
-
-  12,13,15,
-  15,13,14,	
-
-  16,17,19,
-  19,17,18,
-
-  20,21,23,
-  23,21,22
-];
-*/
-
 window.addEventListener('load', load);
 
 function load(): void {
@@ -102,7 +48,7 @@ function load(): void {
   
   renderer = new Renderer(gl);
 
-  texture = new Texture(renderer, './res/box.png');
+  texture = new Texture(renderer, './res/stall.png');
 
   shader = new Shader(renderer);
   shader.parseShader(
@@ -112,25 +58,13 @@ function load(): void {
   .then(() => TextureLoader.load([
     texture
   ]))
-  .then(() => OBJLoader.loadObjModel(renderer, './res/box.obj', model))
+  .then(() => OBJLoader.loadObjModel(renderer, './res/stall.obj', model))
   .then(() => start(canvas, gl));
 }
 
 function start(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-  
-  /*
-  const va = new VertexArray(renderer);
-  const vb = new VertexBuffer(renderer, positions);
-
-  const layout = new VertexBufferLayout(renderer);
-  layout.pushFloat(3);
-  layout.pushFloat(2);
-  va.addBuffer(vb, layout);
-
-  const ib = new IndexBuffer(renderer, indices, indices.length);
-  */
 
   const projectionMatrix = mat4.perspective(
     mat4.create(),
