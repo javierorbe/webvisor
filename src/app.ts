@@ -11,13 +11,18 @@ import IndexBuffer from './render/IndexBuffer';
 import { toRadians, createTransformationMatrix } from './math/MathUtils';
 import Keyboard from './Keyboard';
 import Camera from './scene/Camera';
+import OBJLoader from './render/OBJLoader';
+import RawModel from './render/RawModel';
 
 const log: Log = new Log();
 
 let renderer: Renderer;
-let texture: Texture;
 let shader: Shader;
 
+let texture: Texture;
+let model: RawModel = new RawModel();
+
+/*
 const positions = [
   -0.5,0.5,-0.5,	0, 0,
   -0.5,-0.5,-0.5,	0, 1,
@@ -50,38 +55,6 @@ const positions = [
   0.5,-0.5,0.5,   1, 0 
 ];
 
-const textureCoords = [
-  0, 0,
-  0, 1,
-  1, 1,
-  1, 0,
-
-  0, 0,
-  0, 1,
-  1, 1,
-  1, 0,			
-
-  0, 0,
-  0, 1,
-  1, 1,
-  1, 0,
-
-  0, 0,
-  0, 1,
-  1, 1,
-  1, 0,
-
-  0, 0,
-  0, 1,
-  1, 1,
-  1, 0,
-  
-  0, 0,
-  0, 1,
-  1, 1,
-  1, 0 
-];
-
 const indices = [
   0,1,3,	
   3,1,2,
@@ -101,6 +74,7 @@ const indices = [
   20,21,23,
   23,21,22
 ];
+*/
 
 window.addEventListener('load', load);
 
@@ -128,7 +102,7 @@ function load(): void {
   
   renderer = new Renderer(gl);
 
-  texture = new Texture(renderer, './res/texture.png');
+  texture = new Texture(renderer, './res/box.png');
 
   shader = new Shader(renderer);
   shader.parseShader(
@@ -138,6 +112,7 @@ function load(): void {
   .then(() => TextureLoader.load([
     texture
   ]))
+  .then(() => OBJLoader.loadObjModel(renderer, './res/box.obj', model))
   .then(() => start(canvas, gl));
 }
 
@@ -145,6 +120,7 @@ function start(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   
+  /*
   const va = new VertexArray(renderer);
   const vb = new VertexBuffer(renderer, positions);
 
@@ -154,6 +130,7 @@ function start(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
   va.addBuffer(vb, layout);
 
   const ib = new IndexBuffer(renderer, indices, indices.length);
+  */
 
   const projectionMatrix = mat4.perspective(
     mat4.create(),
@@ -164,17 +141,17 @@ function start(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
     );
   const view = mat4.create();
   mat4.translate(view, view, vec3.fromValues(-100, 0, 0));
-
-  // shader.setUniform4f('uColor', 0.8, 0.3, 0.8, 1.0);
   
   shader.bind();
   texture.bind();
   shader.setUniform1i('uTexture', 0); // 0 = texture slot
   shader.setUniformMat4f('projectionMatrix', projectionMatrix);
 
+  /*
   va.unbind();
   vb.unbind();
   ib.unbind();
+  */
   shader.unbind();
 
   Keyboard.init();
@@ -191,11 +168,11 @@ function start(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
 
     {
       shader.setUniformMat4f('viewMatrix', camera.createViewMatrix());
-      shader.setUniformMat4f('transformationMatrix', createTransformationMatrix(vec3.fromValues(0, 0, -1), increment, increment, 0, 1));
-      renderer.draw(va, ib, shader);
+      shader.setUniformMat4f('transformationMatrix', createTransformationMatrix(vec3.fromValues(0, 0, -5), increment, increment / 2, 0, 1));
+      renderer.draw(model.getVertexArray(), model.getIndexBuffer(), shader);
     }
 
-    increment += 0.05;
+    increment += 0.01;
 
     requestAnimationFrame(draw);
   }
