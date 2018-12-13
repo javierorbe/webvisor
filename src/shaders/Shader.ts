@@ -21,8 +21,9 @@
  * SOFTWARE.
  */
 
-import { mat4 } from 'gl-matrix';
-import Renderer from './Renderer';
+import { vec3, mat4 } from 'gl-matrix';
+import Renderer from '../render/Renderer';
+import Light from '../scene/Light';
 
 export default class Shader {
   
@@ -146,6 +147,16 @@ export default class Shader {
    */
   public setUniform4f(name: string, x: number, y: number, z: number, w: number): void {
     this.gl.uniform4f(this.getUniformLocation(name), x, y, z, w);
+  }
+
+  /**
+   * Set a uniform to a vector of size 3.
+   * 
+   * @param name the uniform name.
+   * @param vec the vector.
+   */
+  public setUniformVec3f(name: string, vec: vec3) {
+    this.gl.uniform3fv(this.getUniformLocation(name), vec);
   }
 
   /**

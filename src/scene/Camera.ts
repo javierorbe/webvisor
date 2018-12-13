@@ -22,12 +22,12 @@
  */
 
 import { vec3, mat4 } from 'gl-matrix';
-import Keyboard from '../Keyboard';
+import Keyboard from '../input/Keyboard';
 import { toRadians } from '../math/MathUtils';
 
 export default class Camera {
   
-  private static readonly CAMERA_VELOCITY = 0.02;
+  private static readonly CAMERA_VELOCITY = 0.05;
 
   private position: vec3 = vec3.fromValues(0, 0, 0);
   private pitch: number = 0;

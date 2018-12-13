@@ -21,47 +21,18 @@
  * SOFTWARE.
  */
 
-import { vec3 } from "gl-matrix";
-import TexturedModel from "../models/TexturedModel";
+import Shader from './Shader';
+import Camera from '../scene/Camera';
+import Light from '../scene/Light';
 
-export default class Entity {
+ export default class StaticShader extends Shader {
 
-  constructor(
-    private readonly model: TexturedModel,
-    private readonly position: vec3,
-    private readonly rotation: vec3,
-    private readonly scale: number
-    ) {}
-
-  public getModel(): TexturedModel {
-    return this.model;
+  public loadViewMatrix(camera: Camera) {
+    this.setUniformMat4f('uViewMatrix', camera.createViewMatrix());
   }
 
-  public getPosition(): vec3 {
-    return this.position;
+  public loadLight(light: Light): void {
+    this.setUniformVec3f('uLightPosition', light.getPosition());
+    this.setUniformVec3f('uLightColor', light.getColor());
   }
-
-  public setPosition(x: number, y: number, z: number): void {
-    vec3.set(this.position, x, y, z)
-  }
-
-  public increasePosition(dx: number, dy: number, dz: number): void {
-    vec3.add(this.position, this.position, vec3.fromValues(dx, dy, dz));
-  }
-
-  public getRotation(): vec3 {
-    return this.rotation;
-  }
-
-  public setRotation(x: number, y: number, z: number): void {
-    vec3.set(this.rotation, x, y, z)
-  }
-
-  public increaseRotation(dx: number, dy: number, dz: number): void {
-    vec3.add(this.rotation, this.rotation, vec3.fromValues(dx, dy, dz));
-  }
-
-  public getScale(): number {
-    return this.scale;
-  }
-}
+ }

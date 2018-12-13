@@ -23,7 +23,7 @@
 
 import VertexArray from './VertexArray';
 import IndexBuffer from './IndexBuffer';
-import Shader from './Shader';
+import Shader from '../shaders/Shader';
 import Entity from '../scene/Entity';
 import { createTransformationMatrix } from '../math/MathUtils';
 
@@ -54,7 +54,7 @@ export default class Renderer {
       entity.getModel().getIndexBuffer().bind();
 
       shader.setUniformMat4f(
-        'transformationMatrix',
+        'uTransformationMatrix',
         createTransformationMatrix(entity.getPosition(), entity.getRotation(), entity.getScale())
         );
       this.gl.drawElements(this.gl.TRIANGLES, entity.getModel().getIndexBuffer().getCount(), this.gl.UNSIGNED_INT, 0);
@@ -79,35 +79,11 @@ export default class Renderer {
     }
   }
 
-  /**
-   * Draw triangle based data via WebGL.
-   * @param {VertexArray} va - VertexArray to bind.
-   * @param {IndexBuffer} ib - IndexBuffer to bind.
-   * @param {Shader} shader - Shader program to bind.
-   */
-  /*
-  public draw(va: VertexArray, ib: IndexBuffer, shader: Shader): void {
-    shader.bind();
-    va.bind();
-    ib.bind();
-
-    this.gl.drawElements(this.gl.TRIANGLES, ib.getCount(), this.gl.UNSIGNED_INT, 0);
-
-    ib.unbind();
-    va.unbind();
-    shader.unbind();
+  public clear(): void {
+    this.gl.clearColor(0.0, 0.0, 0.5, 1.0);
+    this.gl.clearDepth(1.0);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
   }
-
-  /**
-   * 
-   * @param entity 
-   * @param shader 
-   */
-  /*
-  public draw(entity: Entity, shader: Shader): void {
-    
-  }
-  */
 
   public enableCulling(): void {
     this.gl.enable(this.gl.CULL_FACE);

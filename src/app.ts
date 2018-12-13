@@ -2,21 +2,22 @@ import { vec3, mat4 } from 'gl-matrix';
 import Log from './logger/Log';
 import Renderer from './render/Renderer';
 import Texture from './render/Texture';
-import Shader from './render/Shader';
+import Shader from './shaders/Shader';
 import { toRadians } from './math/MathUtils';
-import Keyboard from './Keyboard';
+import Keyboard from './input/Keyboard';
 import Camera from './scene/Camera';
 import Entity from './scene/Entity';
 import TexturedModel from './models/TexturedModel';
+import Light from './scene/Light';
+import StaticShader from './shaders/StaticShader';
 
 const log: Log = new Log();
 
 let renderer: Renderer;
-let shader: Shader;
+let shader: StaticShader;
 
 const entities: Set<Entity> = new Set();
-
-window.addEventListener('load', load);
+let light: Light;
 
 function load(): void {
   const canvas = document.getElementById('canvas');
@@ -35,7 +36,7 @@ function load(): void {
   log.info(gl.getParameter(gl.VERSION));
   
   renderer = new Renderer(gl);
-  shader = new Shader(renderer);
+  shader = new StaticShader(renderer);
 
   const model = new TexturedModel(new Texture(renderer, './res/white.png'), './res/dragon.obj');
 
@@ -50,7 +51,7 @@ function load(): void {
       model
     ])
   ]).then(() => {
-    entities.add(new Entity(model, vec3.fromValues(0, 0, -5), vec3.fromValues(0, 0, 0), 1));
+    entities.add(new Entity(model, vec3.fromValues(0, 0, -25), vec3.fromValues(0, 0, 0), 1));
     start(canvas, gl);
   });
 }
@@ -69,19 +70,20 @@ function start(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
 
   Keyboard.init();
   const camera = new Camera();
+  light = new Light(vec3.fromValues(0, 0, -20), vec3.fromValues(0.9, 0.9, 0.9));
 
   requestAnimationFrame(() => draw(gl, camera));
 }
 
 function draw(gl: WebGL2RenderingContext, camera: Camera) {
-  clear(gl);
+  renderer.clear();
 
   camera.move();
-  entities.forEach(e => e.increaseRotation(0.01, 0.01, 0));
+  entities.forEach(e => e.increaseRotation(0, 0.005, 0));
 
   shader.bind();
-  // Load view matrix
-  shader.setUniformMat4f('viewMatrix', camera.createViewMatrix());
+  shader.loadViewMatrix(camera);
+  shader.loadLight(light);
 
   // Draw entities
   entities.forEach((entity) => renderer.draw(entity, shader));
@@ -99,12 +101,8 @@ function loadProjectionMatrix(shader: Shader, canvas: HTMLCanvasElement) {
     );
 
   shader.bind();
-  shader.setUniformMat4f('projectionMatrix', projectionMatrix);
+  shader.setUniformMat4f('uProjectionMatrix', projectionMatrix);
   shader.unbind();
 }
 
-function clear(gl: WebGL2RenderingContext) {
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  gl.clearDepth(1.0);
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-}
+window.addEventListener('load', load);
