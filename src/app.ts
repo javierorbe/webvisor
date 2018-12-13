@@ -37,7 +37,7 @@ function load(): void {
   renderer = new Renderer(gl);
   shader = new Shader(renderer);
 
-  const model = new TexturedModel(new Texture(renderer, './res/rabbit.png'), './res/rabbit.obj');
+  const model = new TexturedModel(new Texture(renderer, './res/white.png'), './res/dragon.obj');
 
   Promise.all([ // Load data from files
     // Load shaders
@@ -46,7 +46,7 @@ function load(): void {
       './shaders/fragmentShader.glsl'
     ),
     // Load texture and model data
-    TexturedModel.load(renderer, [
+    ...TexturedModel.load(renderer, [
       model
     ])
   ]).then(() => {

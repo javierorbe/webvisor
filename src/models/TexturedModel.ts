@@ -25,14 +25,16 @@ export default class TexturedModel extends RawModel {
    * @param renderer the renderer attached to this model.
    * @param models the models to load.
    */
-  public static load(renderer: Renderer, models: TexturedModel[]) {
-    const promises: Promise<{}>[] = [];
+  public static load(renderer: Renderer, models: TexturedModel[]): Promise<any>[] {
+    const promises: Promise<any>[] = [];
     
     models.forEach(model => {
-      promises.push(Texture.loadImage(model.getTexture())),
-      OBJLoader.loadModel(renderer, model)
+      promises.push(
+        Texture.loadImage(model.getTexture()),
+        OBJLoader.loadModel(renderer, model)
+        )
     });
 
-    return Promise.all(promises);
+    return promises;
   }
 }
