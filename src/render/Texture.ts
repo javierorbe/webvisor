@@ -26,17 +26,17 @@ import { isPowerOf2 } from '../math/MathUtils';
 
 export default class Texture {
 
-  private readonly gl: WebGL2RenderingContext;
   private readonly id: WebGLTexture;
+
+  private reflectivity: number = 0;
+  private shineDamper: number = 1;
 
   /**
    * 
-   * @param renderer the renderer that provides the renderering context.
+   * @param gl the rendering context.
    * @param filepath the filepath to the image file.
    */
-  public constructor(renderer: Renderer, private readonly filepath: string) {
-    this.gl = renderer.getRenderingContext();
-
+  public constructor(private readonly gl: WebGL2RenderingContext, private readonly filepath: string) {
     this.id = this.gl.createTexture();
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.id);
     // Temporal texture data until loaded
@@ -55,6 +55,22 @@ export default class Texture {
 
   public getFilepath(): string {
     return this.filepath;
+  }
+
+  public getReflectivity(): number {
+    return this.reflectivity;
+  }
+
+  public setReflectivity(reflectivity: number): void {
+    this.reflectivity = reflectivity;
+  }
+
+  public getShineDamper(): number {
+    return this.shineDamper;
+  }
+
+  public setShineDamper(shineDamper: number): void {
+    this.shineDamper = shineDamper;
   }
 
   /**

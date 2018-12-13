@@ -53,13 +53,10 @@ export class VertexBufferElement {
 
 export default class VertexBufferLayout {
 
-  private readonly gl: WebGL2RenderingContext;
   private readonly elements: VertexBufferElement[] = [];
   private stride: number = 0;
 
-  public constructor(renderer: Renderer) {
-    this.gl = renderer.getRenderingContext();
-  }
+  public constructor(private readonly gl: WebGL2RenderingContext) {}
 
   public getElements(): VertexBufferElement[] {
     return this.elements;

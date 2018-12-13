@@ -1,23 +1,20 @@
 import { vec3, mat4 } from 'gl-matrix';
 import Log from './logger/Log';
-import Renderer from './render/Renderer';
 import Texture from './render/Texture';
-import Shader from './shaders/Shader';
-import { toRadians } from './math/MathUtils';
 import Keyboard from './input/Keyboard';
 import Camera from './scene/Camera';
 import Entity from './scene/Entity';
 import TexturedModel from './models/TexturedModel';
 import Light from './scene/Light';
-import StaticShader from './shaders/StaticShader';
+import MasterRenderer from './render/MasterRenderer';
+import { randomInRange } from './math/MathUtils';
 
 const log: Log = new Log();
 
-let renderer: Renderer;
-let shader: StaticShader;
-
+let renderer: MasterRenderer;
 const entities: Set<Entity> = new Set();
 let light: Light;
+let dragon: Entity;
 
 function load(): void {
   const canvas = document.getElementById('canvas');
@@ -35,42 +32,49 @@ function load(): void {
 
   log.info(gl.getParameter(gl.VERSION));
   
-  renderer = new Renderer(gl);
-  shader = new StaticShader(renderer);
+  renderer = new MasterRenderer(gl);
 
-  const model = new TexturedModel(new Texture(renderer, './res/white.png'), './res/dragon.obj');
+  const defaultTexture = new Texture(gl, './res/white.png');
+  const dragonModel = new TexturedModel(defaultTexture, './res/dragon.obj');
+  defaultTexture.setShineDamper(10);
+  defaultTexture.setReflectivity(1);
+
+  const boxModel = new TexturedModel(new Texture(gl, './res/box.png'), './res/box.obj');
+
+  dragon = new Entity(dragonModel, vec3.fromValues(0, 0, -25), vec3.fromValues(0, 0, 0), 1);
+  entities.add(dragon);
+
+  for (let i = 0; i < 300; i++) {
+    entities.add(new Entity(
+      boxModel,
+      vec3.fromValues(randomInRange(-40, 40), randomInRange(-40, 40), randomInRange(-40, 40)),
+      vec3.fromValues(randomInRange(0, 360), randomInRange(0, 360), randomInRange(0, 360)),
+      1
+      ));
+  }
 
   Promise.all([ // Load data from files
     // Load shaders
-    shader.parseShader(
+    renderer.getStaticShader().parseShader(
       './shaders/vertexShader.glsl',
       './shaders/fragmentShader.glsl'
     ),
     // Load texture and model data
-    ...TexturedModel.load(renderer, [
-      model
+    ...TexturedModel.load(gl, [
+      dragonModel,
+      boxModel
     ])
   ]).then(() => {
-    entities.add(new Entity(model, vec3.fromValues(0, 0, -25), vec3.fromValues(0, 0, 0), 1));
     start(canvas, gl);
   });
 }
 
 function start(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-  loadProjectionMatrix(shader, canvas);
-
-  // bind a texture
-  // shader.bind();
-  // shader.setUniform1i('uTexture', 0); // 0 = texture slot
-  // entity.getModel().getTexture().bind();
-  // shader.unbind();
+  renderer.getRenderer().loadProjectionMatrix(renderer.getStaticShader(), 70, canvas.width, canvas.height, 0.1, 1000);
 
   Keyboard.init();
   const camera = new Camera();
-  light = new Light(vec3.fromValues(0, 0, -20), vec3.fromValues(0.9, 0.9, 0.9));
+  light = new Light(vec3.fromValues(0, 0, -20), vec3.fromValues(1, 1, 1));
 
   requestAnimationFrame(() => draw(gl, camera));
 }
@@ -79,30 +83,12 @@ function draw(gl: WebGL2RenderingContext, camera: Camera) {
   renderer.clear();
 
   camera.move();
-  entities.forEach(e => e.increaseRotation(0, 0.005, 0));
+  dragon.increaseRotation(0, 0.005, 0);
 
-  shader.bind();
-  shader.loadViewMatrix(camera);
-  shader.loadLight(light);
-
-  // Draw entities
-  entities.forEach((entity) => renderer.draw(entity, shader));
+  entities.forEach((entity) => renderer.processEntity(entity));
+  renderer.render(light, camera);
 
   requestAnimationFrame(() => draw(gl, camera));
-}
-
-function loadProjectionMatrix(shader: Shader, canvas: HTMLCanvasElement) {
-  const projectionMatrix = mat4.perspective(
-    mat4.create(),
-      toRadians(70), // fov
-      canvas.width / canvas.height, // aspect ratio
-      0.1, // near
-      1000 // far
-    );
-
-  shader.bind();
-  shader.setUniformMat4f('uProjectionMatrix', projectionMatrix);
-  shader.unbind();
 }
 
 window.addEventListener('load', load);

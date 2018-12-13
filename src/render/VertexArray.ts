@@ -27,11 +27,9 @@ import VertexBufferLayout, { VertexBufferElement } from './VertexBufferLayout';
 
 export default class VertexArray {
 
-  private readonly gl: WebGL2RenderingContext;
   private readonly id: WebGLVertexArrayObject;
 
-  public constructor(renderer: Renderer) {
-    this.gl = renderer.getRenderingContext();
+  public constructor(private readonly gl: WebGL2RenderingContext) {
     this.id = this.gl.createVertexArray();
   }
 

@@ -33,19 +33,19 @@ export default class OBJLoader {
 
   // TODO: optimize loadObjModel
 
-  public static loadModels(renderer: Renderer, models: RawModel[]) {
+  public static loadModels(gl: WebGL2RenderingContext, models: RawModel[]) {
     return Promise.all(
-      models.map((model) => OBJLoader.loadModel(renderer, model))
+      models.map((model) => OBJLoader.loadModel(gl, model))
     );
   }
 
   /**
    * Read an .obj file and load the data to a model.
    * 
-   * @param renderer the renderer attached to the model.
+   * @param gl the rendering context.
    * @param model the model where the data will be loaded.
    */
-  public static async loadModel(renderer: Renderer, model: RawModel): Promise<void> {
+  public static async loadModel(gl: WebGL2RenderingContext, model: RawModel): Promise<void> {
     const vertices: vec3[] = [];
     const textures: vec2[] = [];
     const normals: vec3[] = [];
@@ -112,15 +112,15 @@ export default class OBJLoader {
         normalsArray[pointer3++]);
     }
 
-    const va = new VertexArray(renderer);
-    const vb = new VertexBuffer(renderer, data);
-    const layout = new VertexBufferLayout(renderer);
+    const va = new VertexArray(gl);
+    const vb = new VertexBuffer(gl, data);
+    const layout = new VertexBufferLayout(gl);
     layout.pushFloat(3);
     layout.pushFloat(2);
     layout.pushFloat(3);
     va.addBuffer(vb, layout);
 
-    const ib = new IndexBuffer(renderer, indicesArray, indicesArray.length);
+    const ib = new IndexBuffer(gl, indicesArray, indicesArray.length);
     model.load(va, ib);
   }
 

@@ -25,14 +25,19 @@ import Shader from './Shader';
 import Camera from '../scene/Camera';
 import Light from '../scene/Light';
 
- export default class StaticShader extends Shader {
+export default class StaticShader extends Shader {
 
-  public loadViewMatrix(camera: Camera) {
+  public loadViewMatrix(camera: Camera): void {
     this.setUniformMat4f('uViewMatrix', camera.createViewMatrix());
   }
 
   public loadLight(light: Light): void {
     this.setUniformVec3f('uLightPosition', light.getPosition());
     this.setUniformVec3f('uLightColor', light.getColor());
+  }
+
+  public loadShineVariables(damper: number, reflectivity: number) {
+    this.setUniform1f('uShineDamper', damper);
+    this.setUniform1f('uReflectivity', reflectivity);
   }
  }

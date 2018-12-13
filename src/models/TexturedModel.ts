@@ -45,16 +45,16 @@ export default class TexturedModel extends RawModel {
   /**
    * Load the object and image data for an array of models.
    * 
-   * @param renderer the renderer attached to this model.
+   * @param gl the rendering context.
    * @param models the models to load.
    */
-  public static load(renderer: Renderer, models: TexturedModel[]): Promise<any>[] {
+  public static load(gl: WebGL2RenderingContext, models: TexturedModel[]): Promise<any>[] {
     const promises: Promise<any>[] = [];
     
     models.forEach(model => {
       promises.push(
         Texture.loadImage(model.getTexture()),
-        OBJLoader.loadModel(renderer, model)
+        OBJLoader.loadModel(gl, model)
         )
     });
 

@@ -25,12 +25,9 @@ import Renderer from './Renderer';
 
 export default class VertexBuffer {
 
-  private readonly gl: WebGL2RenderingContext;
   private readonly id: WebGLBuffer;
 
-  constructor(renderer: Renderer, data: number[]) {
-    this.gl = renderer.getRenderingContext();
-
+  constructor(private readonly gl: WebGL2RenderingContext, data: number[]) {
     this.id = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.id);
     this.gl.bufferData(this.gl.ARRAY_BUFFER,

@@ -31,6 +31,10 @@ export function toRadians(degrees: number): number {
   return degrees * Math.PI / 180;
 }
 
+export function randomInRange(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
 /**
  * 
  * @param translation 

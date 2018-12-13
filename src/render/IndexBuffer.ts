@@ -25,12 +25,9 @@ import Renderer from './Renderer';
 
 export default class IndexBuffer {
   
-  private readonly gl: WebGL2RenderingContext;
   private readonly id: WebGLBuffer;
 
-  constructor(renderer: Renderer, data: number[], private count: number) {
-    this.gl = renderer.getRenderingContext();
-
+  constructor(private readonly gl: WebGL2RenderingContext, data: number[], private count: number) {
     this.id = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.id);
     this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER,

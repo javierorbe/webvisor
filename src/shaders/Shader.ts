@@ -22,19 +22,13 @@
  */
 
 import { vec3, mat4 } from 'gl-matrix';
-import Renderer from '../render/Renderer';
-import Light from '../scene/Light';
 
 export default class Shader {
   
-  private readonly gl: WebGL2RenderingContext;
   private id: WebGLProgram = null;
   private readonly uniformLocationCache: Map<string, WebGLUniformLocation> = new Map();
 
-  constructor(renderer: Renderer) {
-    this.gl = renderer.getRenderingContext();
-  }
-
+  public constructor(private readonly gl: WebGL2RenderingContext) {}
   /**
    * Parse the shader programs from files.
    * 
@@ -47,8 +41,8 @@ export default class Shader {
     let fsSource: string;
 
     return Promise.all([
-        fetch(vsFilepath).then(res => res.text().then(txt => vsSource = txt)),
-        fetch(fsFilepath).then(res => res.text().then(txt => fsSource = txt))
+        fetch(vsFilepath).then(res => res.text().then(text => vsSource = text)),
+        fetch(fsFilepath).then(res => res.text().then(text => fsSource = text))
       ]
     ).then(() => {
       this.id = this.initShaderProgram(vsSource, fsSource);
@@ -181,7 +175,7 @@ export default class Shader {
     if (this.uniformLocationCache.has(name)) {
       return this.uniformLocationCache.get(name);
     }
-
+    
     const location = this.gl.getUniformLocation(this.id, name);
     if (location === -1) {
       console.log(`Warning: uniform '${name}' doesn't exist!`);

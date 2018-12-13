@@ -14,6 +14,7 @@ uniform vec3 uLightPosition;
 out vec2 vTextureCoord;
 out vec3 vSurfaceNormal;
 out vec3 vToLight;
+out vec3 vToCamera;
 
 void main() {
 	// The position after being translated and rotated
@@ -26,4 +27,6 @@ void main() {
 	vSurfaceNormal = (uTransformationMatrix * vec4(aNormal, 0.0)).xyz;
 	// The vector from the object position to the light source position.
 	vToLight = uLightPosition - realPosition.xyz;
+	// The vector from the object position to the camera (the view matrix contains an the inverted position of the camera)
+	vToCamera = (inverse(uViewMatrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz - realPosition.xyz;
 }
