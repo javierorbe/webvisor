@@ -57,7 +57,12 @@ export default class Texture {
     return this.filepath;
   }
 
-  public load(image: ImageBitmap | HTMLImageElement): void {
+  /**
+   * Stores the pixel data of an image in the OpenGL texture.
+   * 
+   * @param image the image data of the texture.
+   */
+  public loadImage(image: ImageBitmap | HTMLImageElement): void {
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.id);
     this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, 1); // 1 == true
     this.gl.texImage2D(
@@ -91,5 +96,35 @@ export default class Texture {
 
   public clean(): void {
     this.gl.deleteTexture(this.id);
+  }
+
+  /**
+   * Reads the images of the textures from file and loads them to OpenGL.
+   * 
+   * @param textures the textures to load.
+   */
+  public static load(textures: Texture[]): Promise<{}> {
+    return Promise.all(
+      textures.map(texture => Texture.loadImage(texture))
+    );
+  }
+
+  /**
+   * Reads the image of a texture from file and loads it to OpenGL.
+   * 
+   * @param texture the texture to load.
+   */
+  static loadImage(texture: Texture): Promise<{}> {
+    const path = texture.getFilepath();
+
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        texture.loadImage(image);
+        resolve(image);
+      };
+      image.onerror = () => reject(image);
+      image.src = path;
+    });
   }
 }

@@ -25,8 +25,6 @@ export default class Keyboard {
   
   private static keys: Map<string, boolean> = new Map();
 
-  // KeyW, KeyS...
-
   /**
    * Initialize listeners.
    */

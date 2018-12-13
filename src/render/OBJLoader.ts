@@ -27,19 +27,25 @@ import VertexArray from './VertexArray';
 import VertexBufferLayout from './VertexBufferLayout';
 import VertexBuffer from './VertexBuffer';
 import IndexBuffer from './IndexBuffer';
-import RawModel from './RawModel';
+import RawModel from '../models/RawModel';
 
 export default class OBJLoader {
 
   // TODO: optimize loadObjModel
 
+  public static loadModels(renderer: Renderer, models: RawModel[]) {
+    return Promise.all(
+      models.map((model) => OBJLoader.loadModel(renderer, model))
+    );
+  }
+
   /**
+   * Read an .obj file and load the data to a model.
    * 
-   * @param {string} filepath - Filepath to .obj file.
-   * @param {VertexArray} va - Vertex array to bind model data.
-   * @returns {Promise} - Promise resolved when data is loaded.
+   * @param renderer the renderer attached to the model.
+   * @param model the model where the data will be loaded.
    */
-  static async loadObjModel(renderer: Renderer, filepath: string, model: RawModel): Promise<any> {
+  public static async loadModel(renderer: Renderer, model: RawModel): Promise<void> {
     const vertices: vec3[] = [];
     const textures: vec2[] = [];
     const normals: vec3[] = [];
@@ -47,8 +53,8 @@ export default class OBJLoader {
     const indicesArray: number[] = [];
     const texturesArray = [];
     const normalsArray = [];
-
-    const res = await fetch(filepath);
+    
+    const res = await fetch(model.getFilepath());
     const txt = await res.text();
     const allLines = txt.split(/\r\n|\n/);
     
@@ -75,9 +81,9 @@ export default class OBJLoader {
         const vertex1 = currentLine[1].split('/');
         const vertex2 = currentLine[2].split('/');
         const vertex3 = currentLine[3].split('/');
-        processVertex(vertex1, indicesArray, textures, normals, texturesArray, normalsArray);
-        processVertex(vertex2, indicesArray, textures, normals, texturesArray, normalsArray);
-        processVertex(vertex3, indicesArray, textures, normals, texturesArray, normalsArray);
+        this.processVertex(vertex1, indicesArray, textures, normals, texturesArray, normalsArray);
+        this.processVertex(vertex2, indicesArray, textures, normals, texturesArray, normalsArray);
+        this.processVertex(vertex3, indicesArray, textures, normals, texturesArray, normalsArray);
       }
     });
 
@@ -100,7 +106,7 @@ export default class OBJLoader {
         verticesArray[pointer1++],
         verticesArray[pointer1++],
         texturesArray[pointer2++],
-        1 - texturesArray[pointer2++],
+        texturesArray[pointer2++],
         normalsArray[pointer3++],
         normalsArray[pointer3++],
         normalsArray[pointer3++]);
@@ -117,25 +123,25 @@ export default class OBJLoader {
     const ib = new IndexBuffer(renderer, indicesArray, indicesArray.length);
     model.load(va, ib);
   }
-}
 
-/**
- * 
- * @param vertexData 
- * @param indices 
- * @param textures 
- * @param normals 
- * @param texturesArray 
- * @param normalsArray 
- */
-function processVertex(vertexData: string[], indices: number[], textures: vec2[], normals: vec3[], texturesArray: number[], normalsArray: number[]): void {
-  const currentVertexPosition = Number(vertexData[0]) - 1;
-  indices.push(currentVertexPosition);
-  const currentTexture = textures[Number(vertexData[1]) - 1];
-  texturesArray[currentVertexPosition * 2] = currentTexture[0];
-  texturesArray[currentVertexPosition * 2 + 1] = 1 - currentTexture[1];
-  const currentNormal = normals[Number(vertexData[2]) - 1];
-  normalsArray[currentVertexPosition * 3] = currentNormal[0];
-  normalsArray[currentVertexPosition * 3 + 1] = currentNormal[1];
-  normalsArray[currentVertexPosition * 3 + 2] = currentNormal[2];
+  /**
+   * 
+   * @param vertexData 
+   * @param indices 
+   * @param textures 
+   * @param normals 
+   * @param texturesArray 
+   * @param normalsArray 
+   */
+  private static processVertex(vertexData: string[], indices: number[], textures: vec2[], normals: vec3[], texturesArray: number[], normalsArray: number[]): void {
+    const currentVertexPosition = Number(vertexData[0]) - 1;
+    indices.push(currentVertexPosition);
+    const currentTexture = textures[Number(vertexData[1]) - 1];
+    texturesArray[currentVertexPosition * 2] = currentTexture[0];
+    texturesArray[currentVertexPosition * 2 + 1] = currentTexture[1];
+    const currentNormal = normals[Number(vertexData[2]) - 1];
+    normalsArray[currentVertexPosition * 3] = currentNormal[0];
+    normalsArray[currentVertexPosition * 3 + 1] = currentNormal[1];
+    normalsArray[currentVertexPosition * 3 + 2] = currentNormal[2];
+  }
 }

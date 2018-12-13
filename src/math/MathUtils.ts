@@ -39,14 +39,14 @@ export function toRadians(degrees: number): number {
  * @param rz the angle in radians to rotate around the Z axis.
  * @param scale 
  */
-export function createTransformationMatrix(translation: vec3, rx: number, ry: number, rz: number, scale: number) {
+export function createTransformationMatrix(translation: vec3, rotation: vec3, scale: number) {
   const matrix = mat4.create(); // identity matrix
 
   mat4.translate(matrix, matrix, translation);
 
-  mat4.rotate(matrix, matrix, rx, vec3.fromValues(1, 0, 0));
-  mat4.rotate(matrix, matrix, ry, vec3.fromValues(0, 1, 0));
-  mat4.rotate(matrix, matrix, rz, vec3.fromValues(0, 0, 1));
+  mat4.rotate(matrix, matrix, rotation[0], vec3.fromValues(1, 0, 0));
+  mat4.rotate(matrix, matrix, rotation[1], vec3.fromValues(0, 1, 0));
+  mat4.rotate(matrix, matrix, rotation[2], vec3.fromValues(0, 0, 1));
   
   mat4.scale(matrix, matrix, vec3.fromValues(scale, scale, scale));
 

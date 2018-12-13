@@ -1,10 +1,16 @@
-import VertexArray from './VertexArray';
-import IndexBuffer from './IndexBuffer';
+import VertexArray from '../render/VertexArray';
+import IndexBuffer from '../render/IndexBuffer';
 
 export default class RawModel {
 
   private va: VertexArray;
   private ib: IndexBuffer;
+
+  public constructor(private readonly filepath: string) {}
+
+  public getFilepath(): string {
+    return this.filepath;
+  }
 
   public getVertexArray(): VertexArray {
     return this.va;
