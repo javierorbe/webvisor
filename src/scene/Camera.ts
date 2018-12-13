@@ -35,17 +35,23 @@ export default class Camera {
   private roll: number = 0;
 
   public move(): void {
-    if (Keyboard.isUp()) {
+    if (Keyboard.isPressed('KeyW')) { // Forward
       vec3.add(this.position, this.position, vec3.fromValues(0, 0, -Camera.CAMERA_VELOCITY));
     }
-    if (Keyboard.isDown()) {
+    if (Keyboard.isPressed('KeyS')) { // Backward
       vec3.add(this.position, this.position, vec3.fromValues(0, 0, Camera.CAMERA_VELOCITY));
     }
-    if (Keyboard.isLeft()) {
+    if (Keyboard.isPressed('KeyA')) { // Left
       vec3.add(this.position, this.position, vec3.fromValues(-Camera.CAMERA_VELOCITY, 0, 0));
     }
-    if (Keyboard.isRight()) {
+    if (Keyboard.isPressed('KeyD')) { // Right
       vec3.add(this.position, this.position, vec3.fromValues(Camera.CAMERA_VELOCITY, 0, 0));
+    }
+    if (Keyboard.isPressed('Space')) { // Up
+      vec3.add(this.position, this.position, vec3.fromValues(0, Camera.CAMERA_VELOCITY, 0));
+    }
+    if (Keyboard.isPressed('ShiftLeft')) { // Down
+      vec3.add(this.position, this.position, vec3.fromValues(0, -Camera.CAMERA_VELOCITY, 0));
     }
   }
 

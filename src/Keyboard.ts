@@ -23,60 +23,33 @@
 
 export default class Keyboard {
   
-  private static up: boolean = false;
-  private static down: boolean = false;
-  private static left: boolean = false;
-  private static right: boolean = false;
+  private static keys: Map<string, boolean> = new Map();
 
-  public static init() {
+  // KeyW, KeyS...
+
+  /**
+   * Initialize listeners.
+   */
+  public static init(): void {
     window.addEventListener('keydown', (event: KeyboardEvent) => {
-      switch (event.code) {
-        case 'KeyW':
-          Keyboard.up = true;
-          break;
-        case 'KeyS':
-          Keyboard.down = true;
-          break;
-        case 'KeyA':
-          Keyboard.left = true;
-          break;
-        case 'KeyD':
-          Keyboard.right = true;
-          break;
-      }
+      this.keys.set(event.code, true);
     });
 
     window.addEventListener('keyup', (event: KeyboardEvent) => {
-      switch (event.code) {
-        case 'KeyW':
-          Keyboard.up = false;
-          break;
-        case 'KeyS':
-          Keyboard.down = false;
-          break;
-        case 'KeyA':
-          Keyboard.left = false;
-          break;
-        case 'KeyD':
-          Keyboard.right = false;
-          break;
-      }
+      this.keys.set(event.code, false);
     });
   }
 
-  public static isUp(): boolean {
-    return Keyboard.up;
-  }
-
-  public static isDown(): boolean {
-    return Keyboard.down;
-  }
-
-  public static isLeft(): boolean {
-    return Keyboard.left;
-  }
-
-  public static isRight(): boolean {
-    return Keyboard.right;
+  /**
+   * Returns true if the key with the specified code is pressed.
+   * 
+   * @param code the key code.
+   */
+  public static isPressed(code: string): boolean {
+    if (this.keys.has(code)) {
+      return this.keys.get(code);
+    } else {
+      return false;
+    }
   }
 }

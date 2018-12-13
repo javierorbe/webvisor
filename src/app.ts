@@ -48,7 +48,7 @@ function load(): void {
   
   renderer = new Renderer(gl);
 
-  texture = new Texture(renderer, './res/stall.png');
+  texture = new Texture(renderer, './res/rabbit.png');
 
   shader = new Shader(renderer);
   shader.parseShader(
@@ -58,7 +58,7 @@ function load(): void {
   .then(() => TextureLoader.load([
     texture
   ]))
-  .then(() => OBJLoader.loadObjModel(renderer, './res/stall.obj', model))
+  .then(() => OBJLoader.loadObjModel(renderer, './res/rabbit.obj', model))
   .then(() => start(canvas, gl));
 }
 
