@@ -21,8 +21,6 @@
  * SOFTWARE.
  */
 
-import Renderer from './Renderer';
-
 export default class IndexBuffer {
   
   private readonly id: WebGLBuffer;

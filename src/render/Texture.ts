@@ -21,7 +21,6 @@
  * SOFTWARE.
  */
 
-import Renderer from './Renderer';
 import { isPowerOf2 } from '../math/MathUtils';
 
 export default class Texture {
@@ -107,7 +106,7 @@ export default class Texture {
   }
 
   public unbind(): void {
-    this.gl.bindTexture(this.gl.TEXTURE_2D, 0);
+    this.gl.bindTexture(this.gl.TEXTURE_2D, null);
   }
 
   public clean(): void {
@@ -119,10 +118,8 @@ export default class Texture {
    * 
    * @param textures the textures to load.
    */
-  public static load(textures: Texture[]): Promise<{}> {
-    return Promise.all(
-      textures.map(texture => Texture.loadImage(texture))
-    );
+  public static load(textures: Texture[]): Promise<{}>[] {
+    return textures.map(texture => Texture.loadImage(texture));
   }
 
   /**

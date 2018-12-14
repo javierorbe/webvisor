@@ -21,7 +21,6 @@
  * SOFTWARE.
  */
 
-import Renderer from './Renderer';
 import VertexBuffer from './VertexBuffer';
 import VertexBufferLayout, { VertexBufferElement } from './VertexBufferLayout';
 

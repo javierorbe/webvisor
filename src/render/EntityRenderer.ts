@@ -21,46 +21,31 @@
  * SOFTWARE.
  */
 
-import { mat4 } from 'gl-matrix';
-import Shader from '../shaders/Shader';
 import Entity from '../scene/Entity';
 import StaticShader from '../shaders/StaticShader';
 import TexturedModel from '../models/TexturedModel';
-import { createTransformationMatrix, toRadians } from '../math/MathUtils';
-import Camera from '../scene/Camera';
+import { createTransformationMatrix } from '../math/MathUtils';
 
-export default class Renderer {
+export default class EntityRenderer {
   
-  public constructor(private readonly gl: WebGL2RenderingContext) {
-    // Farther objects will be obscured by nearer objects
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-
-    // Don't render triangles facing away from the camera
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace(gl.BACK);
-
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-    gl.clearColor(1.0, 1.0, 1.0, 1.0); // Black color
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  }
+  public constructor(private readonly gl: WebGL2RenderingContext, private readonly shader: StaticShader) {}
 
   public getRenderingContext(): WebGL2RenderingContext {
     return this.gl;
   }
 
-  public render(modelCache: Map<TexturedModel, Set<Entity>>, shader: StaticShader) {
+  public render(modelCache: Map<TexturedModel, Set<Entity>>) {
+    this.enableCulling();
+
     modelCache.forEach((entities, model) => {
       model.getVertexArray().bind();
       model.getIndexBuffer().bind();
       
       model.getTexture().bind();
-      shader.loadShineVariables(model.getTexture().getShineDamper(), model.getTexture().getReflectivity());
+      this.shader.loadShineVariables(model.getTexture().getShineDamper(), model.getTexture().getReflectivity());
       
       entities.forEach((entity) => {
-        shader.setUniformMat4f(
+        this.shader.setUniformMat4f(
           'uTransformationMatrix',
           createTransformationMatrix(entity.getPosition(), entity.getRotation(), entity.getScale())
           );
@@ -70,8 +55,11 @@ export default class Renderer {
       model.getVertexArray().unbind();
       model.getIndexBuffer().unbind();
     });
+
+    this.disableCulling();
   }
 
+  // Don't render triangles facing away from the camera
   public enableCulling(): void {
     this.gl.enable(this.gl.CULL_FACE);
     this.gl.cullFace(this.gl.BACK);
@@ -79,10 +67,5 @@ export default class Renderer {
 
   public disableCulling(): void {
     this.gl.disable(this.gl.CULL_FACE);
-  }
-
-  public loadProjectionMatrix(shader: Shader, camera: Camera): void {  
-    shader.bind();
-    shader.setUniformMat4f('uProjectionMatrix', camera.createProjectionMatrix());
   }
 }

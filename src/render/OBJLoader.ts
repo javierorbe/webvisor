@@ -22,18 +22,17 @@
  */
 
 import { vec2, vec3 } from 'gl-matrix';
-import Renderer from './Renderer';
 import VertexArray from './VertexArray';
 import VertexBufferLayout from './VertexBufferLayout';
 import VertexBuffer from './VertexBuffer';
 import IndexBuffer from './IndexBuffer';
-import RawModel from '../models/RawModel';
+import TexturedModel from '../models/TexturedModel';
 
 export default class OBJLoader {
 
   // TODO: optimize loadObjModel
 
-  public static loadModels(gl: WebGL2RenderingContext, models: RawModel[]) {
+  public static loadModels(gl: WebGL2RenderingContext, models: TexturedModel[]) {
     return Promise.all(
       models.map((model) => OBJLoader.loadModel(gl, model))
     );
@@ -45,7 +44,7 @@ export default class OBJLoader {
    * @param gl the rendering context.
    * @param model the model where the data will be loaded.
    */
-  public static async loadModel(gl: WebGL2RenderingContext, model: RawModel): Promise<void> {
+  public static async loadModel(gl: WebGL2RenderingContext, model: TexturedModel): Promise<void> {
     const vertices: vec3[] = [];
     const textures: vec2[] = [];
     const normals: vec3[] = [];
@@ -105,8 +104,10 @@ export default class OBJLoader {
         verticesArray[pointer1++],
         verticesArray[pointer1++],
         verticesArray[pointer1++],
+        
         texturesArray[pointer2++],
         texturesArray[pointer2++],
+
         normalsArray[pointer3++],
         normalsArray[pointer3++],
         normalsArray[pointer3++]);

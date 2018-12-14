@@ -1,4 +1,4 @@
-import { vec3, mat4 } from 'gl-matrix';
+import { vec3 } from 'gl-matrix';
 import Log from './logger/Log';
 import Texture from './render/Texture';
 import Keyboard from './input/Keyboard';
@@ -9,11 +9,13 @@ import Light from './scene/Light';
 import MasterRenderer from './render/MasterRenderer';
 import { randomInRange } from './math/MathUtils';
 import DroneCamera from './scene/DroneCamera';
+import Terrain from './terrain/Terrain';
 
 const log: Log = new Log();
 
 let renderer: MasterRenderer;
 const entities: Set<Entity> = new Set();
+const terrains: Set<Terrain> = new Set();
 let light: Light;
 let dragon: Entity;
 
@@ -34,7 +36,7 @@ function load(): void {
   window.addEventListener('resize', () => resize(gl), false);
   resize(gl);
 
-  renderer = new MasterRenderer(gl);
+  renderer = new MasterRenderer(gl, 70, canvas.width / canvas.height, 0.1, 1000);
 
   const defaultTexture = new Texture(gl, './res/white.png');
   const dragonModel = new TexturedModel(defaultTexture, './res/dragon.obj');
@@ -63,28 +65,35 @@ function load(): void {
       ));
   }
 
+  const grassTexture: Texture = new Texture(gl, './res/grass.png');
+  terrains.add(new Terrain(gl, 0, 0, grassTexture));
+  terrains.add(new Terrain(gl, 0, -1, grassTexture));
+  terrains.add(new Terrain(gl, -1, -1, grassTexture));
+  terrains.add(new Terrain(gl, -1, 0, grassTexture));
+
   Promise.all([ // Load data from files
     // Load shaders
-    renderer.getStaticShader().parseShader(
-      './shaders/vertexShader.glsl',
-      './shaders/fragmentShader.glsl'
-    ),
+    renderer.getStaticShader().parseShader(),
+    renderer.getTerrainShader().parseShader(),
     // Load texture and model data
     ...TexturedModel.load(gl, [
       dragonModel,
       boxModel,
       treeModel
+    ]),
+    ...Texture.load([
+      grassTexture
     ])
   ]).then(() => {
-    start(canvas, gl);
+    start(gl);
   });
 }
 
-function start(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext): void {
-  const camera = new DroneCamera(70, canvas.width / canvas.height, 0.1, 1000);
-  renderer.getRenderer().loadProjectionMatrix(renderer.getStaticShader(), camera);
-  
-  light = new Light(vec3.fromValues(0, 0, -20), vec3.fromValues(1, 1, 1));
+function start(gl: WebGL2RenderingContext): void {
+  const camera = new DroneCamera();
+  renderer.loadProjectionMatrix(camera);
+
+  light = new Light(vec3.fromValues(0, 20, -20), vec3.fromValues(1, 1, 1));
 
   Keyboard.init();
   requestAnimationFrame((timestamp) => draw(gl, timestamp, camera));
@@ -105,6 +114,7 @@ function draw(gl: WebGL2RenderingContext, timestamp: number, camera: Camera): vo
 
   {
     dragon.increaseRotation(0, 0.005, 0);
+    terrains.forEach((terrain) => renderer.processTerrain(terrain));
     entities.forEach((entity) => renderer.processEntity(entity));
   }
   
@@ -127,7 +137,7 @@ function resize(gl: WebGL2RenderingContext) {
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
 
-  gl.viewport(0, 0, canvasWidth, canvasHeight);
+  gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 }
 
 window.addEventListener('load', load);

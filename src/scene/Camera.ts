@@ -30,11 +30,7 @@ export default abstract class Camera {
   protected readonly position: vec3 = vec3.fromValues(0, 0, 0); // x, y, z
   protected readonly rotation: vec3 = vec3.fromValues(0, 0, 0); // pitch, yaw, roll 
 
-  public constructor(private readonly fov: number, private readonly aspectRatio, private readonly nearPlane: number, private readonly farPlane: number, protected readonly angleAroundOrigin: SmoothNumber, protected readonly distanceFromOrigin: SmoothNumber) {}
-
-  public getFov(): number {
-    return this.fov;
-  }
+  public constructor(protected readonly angleAroundOrigin: SmoothNumber, protected readonly distanceFromOrigin: SmoothNumber) {}
 
   public getPosition(): vec3 {
     return this.position;
@@ -42,6 +38,10 @@ export default abstract class Camera {
 
   public setPosition(x: number, y: number, z: number): void {
     vec3.set(this.position, x, y, z);
+  }
+
+  public setRotation(pitch: number, yaw: number, roll: number) {
+    vec3.set(this.rotation, pitch, yaw, roll);
   }
 
   public getPitch(): number {
@@ -71,15 +71,5 @@ export default abstract class Camera {
     mat4.translate(matrix, matrix, negativePos);
 
     return matrix;
-  }
-
-  public createProjectionMatrix(): mat4 {
-    return mat4.perspective(
-      mat4.create(),
-        toRadians(this.fov),
-        this.aspectRatio, // aspect ratio
-        this.nearPlane,
-        this.farPlane
-      );
   }
 }

@@ -28,21 +28,20 @@ export default class Shader {
   private id: WebGLProgram = null;
   private readonly uniformLocationCache: Map<string, WebGLUniformLocation> = new Map();
 
-  public constructor(private readonly gl: WebGL2RenderingContext) {}
+  public constructor(private readonly gl: WebGL2RenderingContext, private readonly vsFilepath: string, private readonly fsFilepath: string) {}
+
   /**
    * Parse the shader programs from files.
    * 
-   * @param vsFilepath vertex shader filepath.
-   * @param fsFilepath fragment shader filepath.
    * @returns shader loading Promise.
    */
-  public async parseShader(vsFilepath: string, fsFilepath: string): Promise<void> {
+  public async parseShader(): Promise<void> {
     let vsSource: string;
     let fsSource: string;
 
     return Promise.all([
-        fetch(vsFilepath).then(res => res.text().then(text => vsSource = text)),
-        fetch(fsFilepath).then(res => res.text().then(text => fsSource = text))
+        fetch(this.vsFilepath).then(res => res.text().then(text => vsSource = text)),
+        fetch(this.fsFilepath).then(res => res.text().then(text => fsSource = text))
       ]
     ).then(() => {
       this.id = this.initShaderProgram(vsSource, fsSource);

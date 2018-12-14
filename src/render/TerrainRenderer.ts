@@ -1,3 +1,8 @@
+import Terrain from "../terrain/Terrain";
+import TerrainShader from "../shaders/TerrainShader";
+import { createTransformationMatrix } from "../math/MathUtils";
+import { vec3 } from "gl-matrix";
+
 /**
  * @license
  * Copyright (c) 2018 Javier Orbe
@@ -21,27 +26,29 @@
  * SOFTWARE.
  */
 
-export default class VertexBuffer {
+export default class TerrainRenderer {
 
-  private readonly id: WebGLBuffer;
+  public constructor(private readonly gl: WebGL2RenderingContext, private readonly shader: TerrainShader) {}
 
-  constructor(private readonly gl: WebGL2RenderingContext, data: number[]) {
-    this.id = this.gl.createBuffer();
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.id);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER,
-      new Float32Array(data),
-      this.gl.STATIC_DRAW);
-  }
+  public render(terrains: Set<Terrain>): void {
+    terrains.forEach((terrain) => {
+      const model = terrain.getModel();
+      const texture = terrain.getTexture();
 
-  public bind(): void {
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.id);
-  }
+      model.getVertexArray().bind();
+      model.getIndexBuffer().bind();
+      
+      texture.bind();
+      this.shader.loadShineVariables(texture.getShineDamper(), texture.getReflectivity());
+      this.shader.setUniformMat4f(
+        'uTransformationMatrix',
+        createTransformationMatrix(vec3.fromValues(terrain.getX(), 0, terrain.getZ()), vec3.fromValues(0, 0, 0), 1)
+        );
+      
+      this.gl.drawElements(this.gl.TRIANGLES, model.getIndexBuffer().getCount(), this.gl.UNSIGNED_INT, 0);
 
-  public unbind(): void {
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
-  }
-
-  public clean(): void {
-    this.gl.deleteBuffer(this.id);
+      model.getVertexArray().unbind();
+      model.getIndexBuffer().unbind();
+    });
   }
 }

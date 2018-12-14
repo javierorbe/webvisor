@@ -21,27 +21,24 @@
  * SOFTWARE.
  */
 
-export default class VertexBuffer {
+import Shader from './Shader';
+import Camera from '../scene/Camera';
+import Light from '../scene/Light';
 
-  private readonly id: WebGLBuffer;
+export default class TerrainShader extends Shader {
 
-  constructor(private readonly gl: WebGL2RenderingContext, data: number[]) {
-    this.id = this.gl.createBuffer();
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.id);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER,
-      new Float32Array(data),
-      this.gl.STATIC_DRAW);
+  public loadViewMatrix(camera: Camera): void {
+    this.setUniformMat4f('uViewMatrix', camera.createViewMatrix());
   }
 
-  public bind(): void {
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.id);
+  public loadLight(light: Light): void {
+    this.setUniformVec3f('uLightPosition', light.getPosition());
+    this.setUniformVec3f('uLightColor', light.getColor());
   }
 
-  public unbind(): void {
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+  public loadShineVariables(damper: number, reflectivity: number) {
+    this.setUniform1f('uShineDamper', damper);
+    this.setUniform1f('uReflectivity', reflectivity);
   }
-
-  public clean(): void {
-    this.gl.deleteBuffer(this.id);
-  }
-}
+ }
+ 

@@ -21,8 +21,6 @@
  * SOFTWARE.
  */
 
-import Renderer from './Renderer';
-
 export class VertexBufferElement {
   
   public constructor(private readonly type: GLenum, private readonly count: number, private readonly normalized: boolean) {}

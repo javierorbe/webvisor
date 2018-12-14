@@ -23,7 +23,6 @@
 
 import RawModel from './RawModel';
 import Texture from '../render/Texture';
-import Renderer from '../render/Renderer';
 import OBJLoader from '../render/OBJLoader';
 
 export default class TexturedModel extends RawModel {
@@ -34,12 +33,16 @@ export default class TexturedModel extends RawModel {
    * @param texture the texture of the model.
    * @param filepath the filepath to the .obj file of the model.
    */
-  constructor(private readonly texture: Texture, filepath: string) {
-    super(filepath);
+  constructor(private readonly texture: Texture, private readonly filepath: string) {
+    super();
   }
 
   public getTexture(): Texture {
     return this.texture;
+  }
+
+  public getFilepath(): string {
+    return this.filepath;
   }
 
   /**

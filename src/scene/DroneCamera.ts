@@ -28,10 +28,10 @@ import SmoothNumber from '../math/SmoothNumber';
 
 export default class DroneCamera extends Camera {
   
-  private static readonly CAMERA_VELOCITY = 0.05;
+  private static readonly CAMERA_VELOCITY = 0.5;
 
-  public constructor(fov: number, aspectRatio: number, nearPlane: number, farPlane: number) {
-    super(fov, aspectRatio, nearPlane, farPlane, new SmoothNumber(0, 10), new SmoothNumber(30, 5));
+  public constructor() {
+    super(new SmoothNumber(0, 10), new SmoothNumber(30, 5));
   }
 
   public update(): void {

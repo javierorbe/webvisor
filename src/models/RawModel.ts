@@ -29,10 +29,11 @@ export default class RawModel {
   private va: VertexArray;
   private ib: IndexBuffer;
 
-  public constructor(private readonly filepath: string) {}
-
-  public getFilepath(): string {
-    return this.filepath;
+  public constructor(va?: VertexArray, ib?: IndexBuffer) {
+    if (va !== null && ib !== null) {
+      this.va = va;
+      this.ib = ib;
+    }
   }
 
   public getVertexArray(): VertexArray {
