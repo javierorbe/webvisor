@@ -91,9 +91,10 @@ function load(): void {
 
 function start(gl: WebGL2RenderingContext): void {
   const camera = new DroneCamera();
+  camera.setPosition(0, 10, 0);
   renderer.loadProjectionMatrix(camera);
 
-  light = new Light(vec3.fromValues(0, 20, -20), vec3.fromValues(1, 1, 1));
+  light = new Light(vec3.fromValues(0, 25, 0), vec3.fromValues(1, 1, 1));
 
   Keyboard.init();
   requestAnimationFrame((timestamp) => draw(gl, timestamp, camera));
