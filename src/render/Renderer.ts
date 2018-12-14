@@ -27,6 +27,7 @@ import Entity from '../scene/Entity';
 import StaticShader from '../shaders/StaticShader';
 import TexturedModel from '../models/TexturedModel';
 import { createTransformationMatrix, toRadians } from '../math/MathUtils';
+import Camera from '../scene/Camera';
 
 export default class Renderer {
   
@@ -54,8 +55,10 @@ export default class Renderer {
     modelCache.forEach((entities, model) => {
       model.getVertexArray().bind();
       model.getIndexBuffer().bind();
+      
+      model.getTexture().bind();
       shader.loadShineVariables(model.getTexture().getShineDamper(), model.getTexture().getReflectivity());
-
+      
       entities.forEach((entity) => {
         shader.setUniformMat4f(
           'uTransformationMatrix',
@@ -63,53 +66,11 @@ export default class Renderer {
           );
         this.gl.drawElements(this.gl.TRIANGLES, model.getIndexBuffer().getCount(), this.gl.UNSIGNED_INT, 0);
       });
+      
+      model.getVertexArray().unbind();
+      model.getIndexBuffer().unbind();
     });
   }
-
-  /*
-  public draw(va: VertexArray, ib: IndexBuffer, shader: Shader): void;
-  public draw(entity: Entity, shader: StaticShader): void;
-
-  public draw(firstParam: VertexArray | Entity, secondParam: IndexBuffer | Shader, thirdParam?: Shader) {
-    if (firstParam instanceof Entity && secondParam instanceof StaticShader) {
-      const entity: Entity = firstParam;
-      const shader: StaticShader = secondParam;
-
-      shader.bind();
-
-      const model = entity.getModel();
-
-      model.getVertexArray().bind();
-      model.getIndexBuffer().bind();
-
-      shader.loadShineVariables(model.getTexture().getShineDamper(), model.getTexture().getReflectivity());
-
-      shader.setUniformMat4f(
-        'uTransformationMatrix',
-        createTransformationMatrix(entity.getPosition(), entity.getRotation(), entity.getScale())
-        );
-      this.gl.drawElements(this.gl.TRIANGLES, model.getIndexBuffer().getCount(), this.gl.UNSIGNED_INT, 0);
-
-      model.getIndexBuffer().unbind();
-      model.getVertexArray().unbind();
-      shader.unbind();
-    } else if (firstParam instanceof VertexArray && secondParam instanceof IndexBuffer) {
-      const va: VertexArray = firstParam;
-      const ib: IndexBuffer = secondParam;
-      const shader: Shader = thirdParam;
-
-      shader.bind();
-      va.bind();
-      ib.bind();
-
-      this.gl.drawElements(this.gl.TRIANGLES, ib.getCount(), this.gl.UNSIGNED_INT, 0);
-
-      ib.unbind();
-      va.unbind();
-      shader.unbind();
-    }
-  }
-  */
 
   public enableCulling(): void {
     this.gl.enable(this.gl.CULL_FACE);
@@ -120,16 +81,8 @@ export default class Renderer {
     this.gl.disable(this.gl.CULL_FACE);
   }
 
-  public loadProjectionMatrix(shader: Shader, fov: number, canvasWidth: number, canvasHeight: number, nearPlane: number, farPlane: number): void {
-    const projectionMatrix = mat4.perspective(
-      mat4.create(),
-        toRadians(fov),
-        canvasWidth / canvasHeight, // aspect ratio
-        nearPlane,
-        farPlane
-      );
-  
+  public loadProjectionMatrix(shader: Shader, camera: Camera): void {  
     shader.bind();
-    shader.setUniformMat4f('uProjectionMatrix', projectionMatrix);
+    shader.setUniformMat4f('uProjectionMatrix', camera.createProjectionMatrix());
   }
 }

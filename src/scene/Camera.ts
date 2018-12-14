@@ -22,49 +22,64 @@
  */
 
 import { vec3, mat4 } from 'gl-matrix';
-import Keyboard from '../input/Keyboard';
+import SmoothNumber from '../math/SmoothNumber';
 import { toRadians } from '../math/MathUtils';
 
-export default class Camera {
-  
-  private static readonly CAMERA_VELOCITY = 0.05;
+export default abstract class Camera {
 
-  private position: vec3 = vec3.fromValues(0, 0, 0);
-  private pitch: number = 0;
-  private yaw: number = 0;
-  private roll: number = 0;
+  protected readonly position: vec3 = vec3.fromValues(0, 0, 0); // x, y, z
+  protected readonly rotation: vec3 = vec3.fromValues(0, 0, 0); // pitch, yaw, roll 
 
-  public move(): void {
-    if (Keyboard.isPressed('KeyW')) { // Forward
-      vec3.add(this.position, this.position, vec3.fromValues(0, 0, -Camera.CAMERA_VELOCITY));
-    }
-    if (Keyboard.isPressed('KeyS')) { // Backward
-      vec3.add(this.position, this.position, vec3.fromValues(0, 0, Camera.CAMERA_VELOCITY));
-    }
-    if (Keyboard.isPressed('KeyA')) { // Left
-      vec3.add(this.position, this.position, vec3.fromValues(-Camera.CAMERA_VELOCITY, 0, 0));
-    }
-    if (Keyboard.isPressed('KeyD')) { // Right
-      vec3.add(this.position, this.position, vec3.fromValues(Camera.CAMERA_VELOCITY, 0, 0));
-    }
-    if (Keyboard.isPressed('Space')) { // Up
-      vec3.add(this.position, this.position, vec3.fromValues(0, Camera.CAMERA_VELOCITY, 0));
-    }
-    if (Keyboard.isPressed('ShiftLeft')) { // Down
-      vec3.add(this.position, this.position, vec3.fromValues(0, -Camera.CAMERA_VELOCITY, 0));
-    }
+  public constructor(private readonly fov: number, private readonly aspectRatio, private readonly nearPlane: number, private readonly farPlane: number, protected readonly angleAroundOrigin: SmoothNumber, protected readonly distanceFromOrigin: SmoothNumber) {}
+
+  public getFov(): number {
+    return this.fov;
   }
+
+  public getPosition(): vec3 {
+    return this.position;
+  }
+
+  public setPosition(x: number, y: number, z: number): void {
+    vec3.set(this.position, x, y, z);
+  }
+
+  public getPitch(): number {
+    return this.rotation[0];
+  }
+
+  public getYaw(): number {
+    return this.rotation[1];
+  }
+
+  public getRoll(): number {
+    return this.rotation[2];
+  }
+
+  public abstract update(): void;
+
+  public abstract calculateZoom(): void;
 
   public createViewMatrix(): mat4 {
     const matrix = mat4.create();
 
-    mat4.rotate(matrix, matrix, toRadians(this.pitch), [1, 0, 0]);
-    mat4.rotate(matrix, matrix, toRadians(this.yaw), [0, 1, 0]);
-    mat4.rotate(matrix, matrix, toRadians(this.roll), [0, 0, 1]);
+    mat4.rotate(matrix, matrix, toRadians(this.rotation[0]), [1, 0, 0]);
+    mat4.rotate(matrix, matrix, toRadians(this.rotation[1]), [0, 1, 0]);
+    mat4.rotate(matrix, matrix, toRadians(this.rotation[2]), [0, 0, 1]);
 
     const negativePos = vec3.fromValues(-this.position[0], -this.position[1], -this.position[2]);
     mat4.translate(matrix, matrix, negativePos);
 
     return matrix;
+  }
+
+  public createProjectionMatrix(): mat4 {
+    return mat4.perspective(
+      mat4.create(),
+        toRadians(this.fov),
+        this.aspectRatio, // aspect ratio
+        this.nearPlane,
+        this.farPlane
+      );
   }
 }
